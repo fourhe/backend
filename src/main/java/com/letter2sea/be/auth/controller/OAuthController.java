@@ -56,4 +56,13 @@ public class OAuthController {
 
         loginService.deleteRefreshToken(decodedMemberId);
     }
+
+    @GetMapping("/reissue/access-token")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = request.getHeader(REFRESH_TOKEN);
+        Long decodedMemberId = jwtProvider.decode(refreshToken);
+        String reissuedAccessToken = jwtProvider.issueAccessToken(decodedMemberId);
+
+        response.setHeader(ACCESS_TOKEN, reissuedAccessToken);
+    }
 }
