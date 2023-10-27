@@ -26,13 +26,19 @@ public class Member extends BaseTimeEntity {
     private Long kakaoId;
 
     private String nickname;
+    private String refreshToken;
 
     @OneToMany(mappedBy = "writer")
     private List<MailBox> mailBoxes = new ArrayList<>();
 
     @Builder
-    public Member(Long kakaoId, String nickname) {
+    public Member(Long kakaoId, String nickname, String refreshToken) {
         this.kakaoId = kakaoId;
         this.nickname = nickname;
+        this.refreshToken = refreshToken;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
