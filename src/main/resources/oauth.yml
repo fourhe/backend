@@ -1,0 +1,7 @@
+oauth:
+  grant_type: authorization_code
+  client_id: ${OAUTH_CLIENT_ID}
+  redirect_url: ${OAUTH_REDIRECT_URL}
+  access_token_api_url: https://kauth.kakao.com/oauth/token
+  login_form_url: ${OAUTH_LOGIN_FORM_URL}
+  user_api_url: https://kapi.kakao.com/v2/user/me
