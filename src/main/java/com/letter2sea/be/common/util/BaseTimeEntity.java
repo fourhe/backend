@@ -1,4 +1,4 @@
-package com.letter2sea.be;
+package com.letter2sea.be.common.util;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
