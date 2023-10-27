@@ -30,4 +30,12 @@ public class LoginService {
         Member findMember = memberRepository.findById(memberId).orElseThrow(RuntimeException::new);
         findMember.updateRefreshToken(jwtRefreshToken);
     }
+
+    @Transactional
+    public void deleteRefreshToken(Long decodedMemberId) {
+        Member findMember = memberRepository.findById(decodedMemberId)
+            .orElseThrow(RuntimeException::new);
+
+        findMember.updateRefreshToken(null);
+    }
 }

@@ -8,6 +8,7 @@ import com.letter2sea.be.auth.oauth.OAuthProperties;
 import com.letter2sea.be.auth.service.LoginService;
 import com.letter2sea.be.auth.service.OAuthService;
 import com.letter2sea.be.member.Member;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -46,5 +47,13 @@ public class OAuthController {
 
         response.setHeader(ACCESS_TOKEN, jwtAccessToken);
         response.setHeader(REFRESH_TOKEN, jwtRefreshToken);
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+        String refreshToken = request.getHeader(REFRESH_TOKEN);
+        Long decodedMemberId = jwtProvider.decode(refreshToken);
+
+        loginService.deleteRefreshToken(decodedMemberId);
     }
 }

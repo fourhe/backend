@@ -30,6 +30,12 @@ public class JwtProvider {
         return issueToken(REFRESH_TOKEN, memberId, Date.from(Instant.now().plusMillis(ONE_WEEK)));
     }
 
+    public Long decode(String token) {
+        return JWT.decode(token)
+            .getClaim("memberId")
+            .asLong();
+    }
+
     private String issueToken(String subject, Long memberId, Date expireAt) {
         return JWT.create()
             .withIssuer(issuer)
