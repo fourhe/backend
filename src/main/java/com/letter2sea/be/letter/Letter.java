@@ -1,6 +1,6 @@
 package com.letter2sea.be.letter;
 
-import com.letter2sea.be.BaseTimeEntity;
+import com.letter2sea.be.common.util.BaseTimeEntity;
 import com.letter2sea.be.mailbox.MailBox;
 import com.letter2sea.be.member.Member;
 import jakarta.persistence.Column;
