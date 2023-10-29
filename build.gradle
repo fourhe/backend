@@ -5,7 +5,8 @@ plugins {
 }
 
 group = 'com.letter2sea'
-version = '0.0.1-SNAPSHOT'
+project.version = "letter2sea-${new Date().format('yyyyMMddHHmm')}"
+
 
 java {
 	sourceCompatibility = '17'
@@ -51,4 +52,9 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+jar {
+	enabled = false
+	archiveFileName = '${project.version}.jar'
 }

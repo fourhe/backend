@@ -1,4 +1,39 @@
 spring:
+  profiles:
+    default: local
+
+  config:
+    import: oauth.yml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: deploy
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        show_sql: true
+    defer-datasource-initialization: true
+
+  datasource:
+    url: jdbc:mysql://${DATASOURCE_HOSTNAME}:${DATASOURCE_PORT}/${DATASOURCE_DBNAME}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
 
   h2:
     console:
@@ -11,5 +46,3 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
-  config:
-    import: oauth.yml
