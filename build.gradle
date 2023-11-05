@@ -32,6 +32,10 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// lombok for test environment
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
 	//DB
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	implementation 'com.h2database:h2'
@@ -45,6 +49,10 @@ dependencies {
 	
 	//Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// TestContainers
+	testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
+	testImplementation 'org.testcontainers:mysql:1.17.6'
 
 	// WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'

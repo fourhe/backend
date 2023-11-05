@@ -46,3 +46,28 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        show-sql: true
+
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:mysql:8://testDB
+    username:
+    password:
+    hikari:
+      maximum-pool-size: 5
+  sql:
+    init:
+      mode: never
