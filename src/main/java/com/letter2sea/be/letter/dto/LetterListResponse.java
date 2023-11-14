@@ -9,13 +9,13 @@ public class LetterListResponse {
 
     private final Long id;
     private final String title;
-    private final boolean existsReply;
+    private final boolean hasNewReply;
     private final LocalDateTime createdAt;
 
     public LetterListResponse(Letter letter) {
         this.id = letter.getId();
         this.title = letter.getTitle();
-        this.existsReply = false;
+        this.hasNewReply = false;
         this.createdAt = letter.getCreatedAt();
     }
 }

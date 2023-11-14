@@ -28,7 +28,7 @@ public class Member extends BaseTimeEntity {
     private String nickname;
     private String refreshToken;
 
-    @OneToMany(mappedBy = "writer")
+    @OneToMany(mappedBy = "member")
     private List<MailBox> mailBoxes = new ArrayList<>();
 
     @Builder
