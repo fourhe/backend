@@ -2,6 +2,7 @@ package com.letter2sea.be.letter.service;
 
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.dto.LetterCreateRequest;
+import com.letter2sea.be.letter.dto.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.LetterListResponse;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.member.Member;
@@ -33,5 +34,10 @@ public class LetterService {
             .stream()
             .map(LetterListResponse::new)
             .collect(Collectors.toList());
+    }
+
+    public LetterDetailResponse findDetail(Long id, Long writerId) {
+        Letter findDetail = letterRepository.findByIdAndWriterId(id, writerId);
+        return new LetterDetailResponse(findDetail);
     }
 }

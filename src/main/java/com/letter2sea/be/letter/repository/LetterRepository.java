@@ -10,4 +10,5 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     List<Letter> findByWriterId(Long writerId);
 
+    Letter findByIdAndWriterId(Long id, Long writerId);
 }
