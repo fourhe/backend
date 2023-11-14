@@ -1,4 +1,4 @@
-package com.letter2sea.be.mailbox;
+package com.letter2sea.be.mailbox.domain;
 
 import com.letter2sea.be.common.util.BaseTimeEntity;
 import com.letter2sea.be.letter.domain.Letter;

@@ -1,7 +1,7 @@
 package com.letter2sea.be.member;
 
 import com.letter2sea.be.common.util.BaseTimeEntity;
-import com.letter2sea.be.mailbox.MailBox;
+import com.letter2sea.be.mailbox.domain.MailBox;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
