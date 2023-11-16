@@ -1,7 +1,7 @@
-package com.letter2sea.be.mailbox;
+package com.letter2sea.be.mailbox.domain;
 
 import com.letter2sea.be.common.util.BaseTimeEntity;
-import com.letter2sea.be.letter.Letter;
+import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.member.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,5 +29,5 @@ public class MailBox extends BaseTimeEntity {
 
     @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
-    private Member writer;
+    private Member member;
 }

@@ -16,7 +16,7 @@ public class LoginService {
 
     @Transactional
     public Long login(Member oauthMember) {
-        Optional<Member> optionalMember = memberRepository.findById(oauthMember.getKakaoId());
+        Optional<Member> optionalMember = memberRepository.findByKakaoId(oauthMember.getKakaoId());
 
         if (optionalMember.isEmpty()) {
             memberRepository.save(oauthMember);
