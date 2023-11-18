@@ -30,14 +30,16 @@ public class LetterService {
     }
 
     public List<LetterListResponse> findList(Long writerId) {
-        return letterRepository.findByWriterId(writerId)
+        return letterRepository.findAllByWriterId(writerId)
             .stream()
             .map(LetterListResponse::new)
             .collect(Collectors.toList());
     }
 
     public LetterDetailResponse findDetail(Long id, Long writerId) {
-        Letter findDetail = letterRepository.findByIdAndWriterId(id, writerId);
+        Letter findDetail = letterRepository.findByIdAndWriterId(id, writerId)
+            .orElseThrow();
+
         return new LetterDetailResponse(findDetail);
     }
 }
