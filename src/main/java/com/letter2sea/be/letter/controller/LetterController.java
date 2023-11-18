@@ -2,9 +2,12 @@ package com.letter2sea.be.letter.controller;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
 import com.letter2sea.be.letter.dto.LetterCreateRequest;
+import com.letter2sea.be.letter.dto.LetterListResponse;
 import com.letter2sea.be.letter.service.LetterService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,5 +24,11 @@ public class LetterController {
         @RequestBody LetterCreateRequest letterCreateRequest) {
         Long writerId = jwtProvider.decode(request.getHeader("Authorization"));
         letterService.create(writerId, letterCreateRequest);
+    }
+
+    @GetMapping("/letter")
+    public List<LetterListResponse> acquire(HttpServletRequest request) {
+        Long memberId = jwtProvider.decode(request.getHeader("Authorization"));
+        return letterService.getRandom(memberId);
     }
 }
