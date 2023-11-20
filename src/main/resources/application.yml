@@ -35,13 +35,18 @@ spring:
     activate:
       on-profile: local
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
   h2:
     console:
       enabled: true
       path: /h2-console
 
   datasource:
-    url: jdbc:h2:mem:letter2sea
+    url: jdbc:h2:~/letter2sea
     username: sa
     password:
     driver-class-name: org.h2.Driver
