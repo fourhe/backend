@@ -30,4 +30,9 @@ public class MailBox extends BaseTimeEntity {
     @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+
+    public MailBox(Letter letter, Member member) {
+        this.letter = letter;
+        this.member = member;
+    }
 }
