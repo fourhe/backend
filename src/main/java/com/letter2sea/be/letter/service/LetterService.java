@@ -96,10 +96,21 @@ public class LetterService {
         Letter letter = letterRepository.findById(id).orElseThrow();
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
         if (existsByIdAndWriterId || letter.getReplyLetterId() != null) {
-            throw new RuntimeException("답장할 수 없는 편지입니다.");
+            throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
         letterRepository.save(replyLetter);
+    }
+
+    public List<LetterListResponse> findReplyList(Long id, Long writerId) {
+        findMember(writerId);
+        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
+        if (!existsByIdAndWriterId) {
+            throw new RuntimeException("존재하지 않은 편지입니다.");
+        }
+        return letterRepository.findAllByReplyLetterId(id).stream()
+            .map(LetterListResponse::new)
+            .toList();
     }
 
     private Member findMember(Long writerId) {

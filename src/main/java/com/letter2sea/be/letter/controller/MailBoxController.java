@@ -34,4 +34,11 @@ public class MailBoxController {
         Long writerId = jwtProvider.decode(authorization);
         return letterService.findDetail(id, writerId);
     }
+
+    @GetMapping("/{id}/replies")
+    public List<LetterListResponse> getReplyList(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long writerId = jwtProvider.decode(authorization);
+        return letterService.findReplyList(id, writerId);
+    }
 }
