@@ -1,4 +1,4 @@
-package com.letter2sea.be.letter.dto;
+package com.letter2sea.be.letter.dto.response;
 
 import com.letter2sea.be.letter.domain.Letter;
 import java.time.LocalDateTime;

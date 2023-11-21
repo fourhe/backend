@@ -1,8 +1,8 @@
 package com.letter2sea.be.letter.controller;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
-import com.letter2sea.be.letter.dto.LetterDetailResponse;
-import com.letter2sea.be.letter.dto.LetterListResponse;
+import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
+import com.letter2sea.be.letter.dto.response.LetterListResponse;
 import com.letter2sea.be.letter.service.LetterService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +33,19 @@ public class MailBoxController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @PathVariable Long id) {
         Long writerId = jwtProvider.decode(authorization);
         return letterService.findDetail(id, writerId);
+    }
+
+    @GetMapping("/{id}/replies")
+    public List<LetterListResponse> getReplyList(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        return letterService.findReplyList(id, memberId);
+    }
+
+    @GetMapping("/{id}/replies/{replyId}")
+    public LetterDetailResponse getReplyDetail(@PathVariable Long id, @PathVariable Long replyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        return letterService.findReplyDetail(id, replyId, memberId);
     }
 }

@@ -12,16 +12,22 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LetterRepository extends JpaRepository<Letter, Long> {
 
-    List<Letter> findAllByWriterId(Long writerId);
+    List<Letter> findAllByWriterIdAndReplyLetterIdIsNull(@Param("writerId") Long writerId);
+
+    List<Letter> findAllByReplyLetterId(Long id);
 
     Optional<Letter> findByIdAndWriterId(Long id, Long writerId);
 
-    List<Letter> findAllByWriterNot(Member writer);
+    boolean existsByWriterIdAndReplyLetterId(Long writerId, Long replyLetterId);
+
+    //작성자가 아니면서, replyLetterId가 null인
+    List<Letter> findAllByWriterNotAndReplyLetterIdIsNull(@Param("writer") Member writer);
 
     boolean existsByIdAndWriterId(Long id, Long writerId);
 
+    //작성자 아니면서 안읽은 메시지가 있으면서 replyLetterId가 null인
     //추후 동적 쿼리 또는 한번에 정렬해서 가져오는 쿼리로 변경 예정
-    @Query("SELECT l FROM Letter l WHERE l.writer <> :writer AND (:ids IS NULL OR l.id NOT IN :ids)")
+    @Query("SELECT l FROM Letter l WHERE l.replyLetterId is null AND l.writer <> :writer AND (:ids IS NULL OR l.id NOT IN :ids)")
     List<Letter> findAllByWriterNotAndIdNotIn(@Param("writer") Member writer, @Param("ids") List<Long> ids);
 
 //    @Query("select l from Letter l where l.id not in (:id)")

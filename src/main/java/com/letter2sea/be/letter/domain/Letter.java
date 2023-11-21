@@ -48,4 +48,6 @@ public class Letter extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
+    private Long replyLetterId;
+
 }
