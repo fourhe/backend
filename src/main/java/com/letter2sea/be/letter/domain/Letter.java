@@ -39,7 +39,7 @@ public class Letter extends BaseTimeEntity {
     private Member writer;
 
     @OneToMany(mappedBy = "letter")
-    private List<MailBox> mailBoxes = new ArrayList<>();
+    private final List<MailBox> mailBoxes = new ArrayList<>();
 
     private String title;
 
