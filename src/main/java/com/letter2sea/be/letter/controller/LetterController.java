@@ -4,6 +4,7 @@ import com.letter2sea.be.auth.jwt.JwtProvider;
 import com.letter2sea.be.letter.dto.LetterCreateRequest;
 import com.letter2sea.be.letter.dto.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.LetterListResponse;
+import com.letter2sea.be.letter.dto.LetterReplyRequest;
 import com.letter2sea.be.letter.service.LetterService;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +32,14 @@ public class LetterController {
         @RequestBody LetterCreateRequest letterCreateRequest) {
         Long writerId = jwtProvider.decode(authorization);
         letterService.create(writerId, letterCreateRequest);
+    }
+
+    @PostMapping("/{id}/reply")
+    public void reply(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+        @RequestBody LetterReplyRequest letterReplyRequest) {
+        Long writerId = jwtProvider.decode(authorization);
+        letterService.reply(id, writerId, letterReplyRequest);
     }
 
     @GetMapping
