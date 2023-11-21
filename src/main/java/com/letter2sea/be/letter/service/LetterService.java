@@ -1,10 +1,10 @@
 package com.letter2sea.be.letter.service;
 
 import com.letter2sea.be.letter.domain.Letter;
-import com.letter2sea.be.letter.dto.LetterCreateRequest;
-import com.letter2sea.be.letter.dto.LetterDetailResponse;
-import com.letter2sea.be.letter.dto.LetterListResponse;
-import com.letter2sea.be.letter.dto.LetterReplyRequest;
+import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
+import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
+import com.letter2sea.be.letter.dto.response.LetterListResponse;
+import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
@@ -91,7 +91,7 @@ public class LetterService {
     }
 
     @Transactional
-    public void reply(Long id, Long writerId, LetterReplyRequest letterReplyRequest) {
+    public void reply(Long id, Long writerId, ReplyCreateRequest letterReplyRequest) {
         Member member = findMember(writerId);
         Letter letter = letterRepository.findById(id).orElseThrow();
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);

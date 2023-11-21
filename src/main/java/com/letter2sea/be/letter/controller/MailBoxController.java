@@ -1,8 +1,8 @@
 package com.letter2sea.be.letter.controller;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
-import com.letter2sea.be.letter.dto.LetterDetailResponse;
-import com.letter2sea.be.letter.dto.LetterListResponse;
+import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
+import com.letter2sea.be.letter.dto.response.LetterListResponse;
 import com.letter2sea.be.letter.service.LetterService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

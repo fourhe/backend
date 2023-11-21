@@ -1,11 +1,11 @@
-package com.letter2sea.be.letter.dto;
+package com.letter2sea.be.letter.dto.request;
 
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.member.Member;
 import lombok.Getter;
 
 @Getter
-public class LetterReplyRequest {
+public class ReplyCreateRequest {
 
     private String title;
     private String content;
