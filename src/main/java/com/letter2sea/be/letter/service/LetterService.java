@@ -79,11 +79,11 @@ public class LetterService {
         Member member = findMember(memberId);
         Letter letter = letterRepository.findById(id).orElseThrow();
 
-        boolean existReadLetter = member.getMailBoxes().stream()
-            .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
+        boolean existAlreadyReadLetter = member.getMailBoxes().stream()
+            .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
 
-        if (existsByIdAndWriterId || existReadLetter) {
+        if (existsByIdAndWriterId || existAlreadyReadLetter) {
             throw new RuntimeException("잘못된 id입니다.");
         }
         mailBoxRepository.save(new MailBox(letter, member));
