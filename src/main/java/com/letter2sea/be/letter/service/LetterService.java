@@ -37,7 +37,7 @@ public class LetterService {
     }
 
     public List<LetterListResponse> findList(Long writerId) {
-        return letterRepository.findAllByWriterId(writerId)
+        return letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId)
             .stream()
             .map(LetterListResponse::new)
             .collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class LetterService {
             .toList();
 
         if (readLetters.isEmpty()) {
-            List<Letter> unreadLetters = letterRepository.findAllByWriterNot(member);
+            List<Letter> unreadLetters = letterRepository.findAllByWriterNotAndReplyLetterIdIsNull(member);
             if (unreadLetters.isEmpty()) {
                 throw new RuntimeException("더이상 읽을 편지가 없습니다.");
             }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LetterRepository extends JpaRepository<Letter, Long> {
 
-    List<Letter> findAllByWriterId(Long writerId);
+    List<Letter> findAllByWriterIdAndReplyLetterIdIsNull(@Param("writerId") Long writerId);
 
     List<Letter> findAllByReplyLetterId(Long id);
 
@@ -21,8 +21,7 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
     boolean existsByWriterIdAndReplyLetterId(Long writerId, Long replyLetterId);
 
     //작성자가 아니면서, replyLetterId가 null인
-    @Query("select l from Letter l where l.replyLetterId is null")
-    List<Letter> findAllByWriterNot(Member writer);
+    List<Letter> findAllByWriterNotAndReplyLetterIdIsNull(@Param("writer") Member writer);
 
     boolean existsByIdAndWriterId(Long id, Long writerId);
 
