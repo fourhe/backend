@@ -38,7 +38,14 @@ public class MailBoxController {
     @GetMapping("/{id}/replies")
     public List<LetterListResponse> getReplyList(@PathVariable Long id,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-        Long writerId = jwtProvider.decode(authorization);
-        return letterService.findReplyList(id, writerId);
+        Long memberId = jwtProvider.decode(authorization);
+        return letterService.findReplyList(id, memberId);
+    }
+
+    @GetMapping("/{id}/replies/{replyId}")
+    public LetterDetailResponse getReplyDetail(@PathVariable Long id, @PathVariable Long replyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        return letterService.findReplyDetail(id, replyId, memberId);
     }
 }

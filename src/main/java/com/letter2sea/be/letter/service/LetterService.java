@@ -2,9 +2,9 @@ package com.letter2sea.be.letter.service;
 
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
+import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
-import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
@@ -102,15 +102,35 @@ public class LetterService {
         letterRepository.save(replyLetter);
     }
 
-    public List<LetterListResponse> findReplyList(Long id, Long writerId) {
-        findMember(writerId);
-        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
+    public List<LetterListResponse> findReplyList(Long id, Long memberId) {
+        findMember(memberId);
+        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         if (!existsByIdAndWriterId) {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         return letterRepository.findAllByReplyLetterId(id).stream()
             .map(LetterListResponse::new)
             .toList();
+    }
+
+    @Transactional
+    public LetterDetailResponse findReplyDetail(Long id, Long replyId, Long memberId) {
+        Member member = findMember(memberId);
+        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
+
+        //답장할 때 본인 편지에 답장을 못하게 막았음 -> memberId와 replyId를 가지고 있는지 검증이 필요한지?
+
+        Letter reply = letterRepository.findById(replyId).orElseThrow();
+        if (!existsByIdAndWriterId) {
+            throw new RuntimeException("존재하지 않은 편지입니다.");
+        }
+        boolean existsAlreadySavedLetter = reply.getMailBoxes().stream()
+            .anyMatch(mailBox -> mailBox.getMember().equals(member)
+                && mailBox.getLetter().equals(reply));
+        if (!existsAlreadySavedLetter) {
+            mailBoxRepository.save(new MailBox(reply, member));
+        }
+        return new LetterDetailResponse(reply);
     }
 
     private Member findMember(Long writerId) {
