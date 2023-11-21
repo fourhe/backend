@@ -18,6 +18,8 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     Optional<Letter> findByIdAndWriterId(Long id, Long writerId);
 
+    boolean existsByWriterIdAndReplyLetterId(Long writerId, Long replyLetterId);
+
     //작성자가 아니면서, replyLetterId가 null인
     @Query("select l from Letter l where l.replyLetterId is null")
     List<Letter> findAllByWriterNot(Member writer);

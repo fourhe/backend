@@ -98,6 +98,12 @@ public class LetterService {
         if (existsByIdAndWriterId || letter.getReplyLetterId() != null) {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
+        boolean existsByWriterIdAndReplyLetterId = letterRepository
+            .existsByWriterIdAndReplyLetterId(writerId, id);
+
+        if (existsByWriterIdAndReplyLetterId) {
+            throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
+        }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
         letterRepository.save(replyLetter);
     }
