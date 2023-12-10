@@ -6,6 +6,7 @@ import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.service.LetterService;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class LetterController {
 
     @PostMapping
     public void register(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
-        @RequestBody LetterCreateRequest letterCreateRequest) {
+        @Valid @RequestBody LetterCreateRequest letterCreateRequest) {
         Long writerId = jwtProvider.decode(authorization);
         letterService.create(writerId, letterCreateRequest);
     }
