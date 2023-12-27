@@ -25,6 +25,7 @@ public class Member extends BaseTimeEntity {
 
     private Long kakaoId;
 
+    private String email;
     private String nickname;
     private String refreshToken;
 
@@ -32,13 +33,19 @@ public class Member extends BaseTimeEntity {
     private List<MailBox> mailBoxes = new ArrayList<>();
 
     @Builder
-    public Member(Long kakaoId, String nickname, String refreshToken) {
+    public Member(Long kakaoId, String email, String nickname, String refreshToken) {
         this.kakaoId = kakaoId;
+        this.email = email;
         this.nickname = nickname;
         this.refreshToken = refreshToken;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
     }
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
 }

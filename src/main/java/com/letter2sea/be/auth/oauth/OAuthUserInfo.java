@@ -18,12 +18,14 @@ public class OAuthUserInfo {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Properties {
         private String nickname;
+        private String email;
     }
 
     public Member toMember() {
         return Member.builder()
             .kakaoId(id)
             .nickname(getProperties().nickname)
+            .email(getProperties().email)
             .build();
     }
 }
