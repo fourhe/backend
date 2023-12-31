@@ -99,18 +99,23 @@ public class LetterService {
     public void reply(Long id, Long writerId, ReplyCreateRequest letterReplyRequest) {
         Member member = findMember(writerId);
         Letter letter = letterRepository.findById(id).orElseThrow();
+        if (letter.getDeletedAt() != null) {
+            throw new RuntimeException("삭제된 편지는 답장할 수 없습니다.");
+        }
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
         if (existsByIdAndWriterId || letter.getReplyLetterId() != null) {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         boolean existsByWriterIdAndReplyLetterId = letterRepository
             .existsByWriterIdAndReplyLetterId(writerId, id);
-
         if (existsByWriterIdAndReplyLetterId) {
             throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
         }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
-        letterRepository.save(replyLetter);
+        Letter saveLetter = letterRepository.save(replyLetter);
+
+        //답장 보낼 원래 편지 작성자와 답장의 id를 mailbox에 저장
+        mailBoxRepository.save(new MailBox(saveLetter, letter.getWriter()));
     }
 
     public List<LetterListResponse> findReplyList(Long id, Long memberId) {
@@ -149,8 +154,13 @@ public class LetterService {
         Member member = findMember(memberId);
         Letter letter = letterRepository.findById(id).orElseThrow();
 
-        MailBox mailBox = mailBoxRepository.findByLetterIdAndMemberId(id, memberId);
-        mailBox.updateDeletedAt();
+        mailBoxRepository.findByLetterIdAndMemberId(id, memberId);
+        boolean existsByLetterIdAndMemberId = mailBoxRepository.existsByLetterIdAndMemberId(id,
+            memberId);
+        if (existsByLetterIdAndMemberId) {
+            throw new RuntimeException("이미 삭제한 편지입니다.");
+        }
+        letter.updateDeletedAt();
         trashRepository.save(new Trash(letter, member));
     }
 
