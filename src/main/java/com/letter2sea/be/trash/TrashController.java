@@ -1,13 +1,13 @@
 package com.letter2sea.be.trash;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
+import com.letter2sea.be.trash.dto.TrashDetailResponse;
 import com.letter2sea.be.trash.dto.TrashListResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,10 +27,10 @@ public class TrashController {
         return trashService.findList(memberId);
     }
 
-    @PostMapping("{Id}")
-    public void restore(@PathVariable Long id,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+    @GetMapping("/{id}")
+    public TrashDetailResponse getDetail(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
         Long memberId = jwtProvider.decode(authorization);
-
+        return trashService.findDetail(id, memberId);
     }
 }
