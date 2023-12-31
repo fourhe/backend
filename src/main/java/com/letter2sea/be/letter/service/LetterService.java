@@ -66,7 +66,7 @@ public class LetterService {
         if (readLetters.isEmpty()) {
             List<Letter> unreadLetters = letterRepository.findAllByWriterNotAndReplyLetterIdIsNull(member);
             if (unreadLetters.isEmpty()) {
-                throw new RuntimeException("더이상 읽을 편지가 없습니다.");
+                return null;
             }
             return unreadLetters.get(random.nextInt(unreadLetters.size())).getId();
             //읽을 편지가 없다면 에러메시지를 응답값으로 전달 예정
@@ -74,7 +74,7 @@ public class LetterService {
         List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
             member, readLetters);
         if (unReadLetters.isEmpty()) {
-            throw new RuntimeException("더이상 읽을 편지가 없습니다.");
+            return null;
         }
         return unReadLetters.get(random.nextInt(unReadLetters.size())).getId();
     }
