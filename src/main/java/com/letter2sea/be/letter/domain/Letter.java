@@ -3,6 +3,7 @@ package com.letter2sea.be.letter.domain;
 import com.letter2sea.be.common.util.BaseTimeEntity;
 import com.letter2sea.be.mailbox.domain.MailBox;
 import com.letter2sea.be.member.Member;
+import com.letter2sea.be.trash.domain.Trash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,6 +41,9 @@ public class Letter extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "letter")
     private final List<MailBox> mailBoxes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "letter")
+    private final List<Trash> TrashList = new ArrayList<>();
 
     private String title;
 

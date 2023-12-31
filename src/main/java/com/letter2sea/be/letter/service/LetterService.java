@@ -10,6 +10,8 @@ import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
 import com.letter2sea.be.member.Member;
 import com.letter2sea.be.member.repository.MemberRepository;
+import com.letter2sea.be.trash.TrashRepository;
+import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -28,12 +30,15 @@ public class LetterService {
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
 
+    private final TrashRepository trashRepository;
+
 
     @Transactional
     public void create(Long writerId, LetterCreateRequest letterCreateRequest) {
         Member member = findMember(writerId);
         Letter letter = letterCreateRequest.toEntity(member);
         letterRepository.save(letter);
+        mailBoxRepository.save(new MailBox(letter, member));
     }
 
     public List<LetterListResponse> findList(Long writerId) {
@@ -137,6 +142,16 @@ public class LetterService {
             mailBoxRepository.save(new MailBox(reply, member));
         }
         return new LetterDetailResponse(reply);
+    }
+
+    @Transactional
+    public void delete(Long id, Long memberId) {
+        Member member = findMember(memberId);
+        Letter letter = letterRepository.findById(id).orElseThrow();
+
+        MailBox mailBox = mailBoxRepository.findByLetterIdAndMemberId(id, memberId);
+        mailBox.updateDeletedAt();
+        trashRepository.save(new Trash(letter, member));
     }
 
     private Member findMember(Long writerId) {

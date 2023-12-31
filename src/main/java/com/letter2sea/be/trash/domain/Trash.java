@@ -1,8 +1,8 @@
-package com.letter2sea.be.mailbox.domain;
+package com.letter2sea.be.trash.domain;
 
-import com.letter2sea.be.common.util.BaseTimeEntity;
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.member.Member;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,11 +18,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MailBox extends BaseTimeEntity {
+public class Trash {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String title;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String content;
 
     @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,12 +39,11 @@ public class MailBox extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
-    public MailBox(Letter letter, Member member) {
+    public Trash(Letter letter, Member member) {
+        this.title = letter.getTitle();
+        this.content = letter.getContent();
         this.letter = letter;
         this.member = member;
-    }
-
-    public void updateDeletedAt() {
         this.deletedAt = LocalDateTime.now();
     }
 }
