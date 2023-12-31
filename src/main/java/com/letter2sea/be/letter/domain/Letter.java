@@ -57,4 +57,8 @@ public class Letter extends BaseTimeEntity {
     public void updateDeletedAt() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void restoreDeletedAt() {
+        this.deletedAt = null;
+    }
 }
