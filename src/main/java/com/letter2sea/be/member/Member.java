@@ -2,6 +2,7 @@ package com.letter2sea.be.member;
 
 import com.letter2sea.be.common.util.BaseTimeEntity;
 import com.letter2sea.be.mailbox.domain.MailBox;
+import com.letter2sea.be.trash.domain.Trash;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +32,9 @@ public class Member extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "member")
     private List<MailBox> mailBoxes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<Trash> TrashList = new ArrayList<>();
 
     @Builder
     public Member(Long kakaoId, String email, String nickname, String refreshToken) {

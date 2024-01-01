@@ -10,6 +10,8 @@ import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
 import com.letter2sea.be.member.Member;
 import com.letter2sea.be.member.repository.MemberRepository;
+import com.letter2sea.be.trash.TrashRepository;
+import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -28,12 +30,15 @@ public class LetterService {
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
 
+    private final TrashRepository trashRepository;
+
 
     @Transactional
     public void create(Long writerId, LetterCreateRequest letterCreateRequest) {
         Member member = findMember(writerId);
         Letter letter = letterCreateRequest.toEntity(member);
         letterRepository.save(letter);
+        mailBoxRepository.save(new MailBox(letter, member));
     }
 
     public List<LetterListResponse> findList(Long writerId) {
@@ -61,7 +66,7 @@ public class LetterService {
         if (readLetters.isEmpty()) {
             List<Letter> unreadLetters = letterRepository.findAllByWriterNotAndReplyLetterIdIsNull(member);
             if (unreadLetters.isEmpty()) {
-                throw new RuntimeException("더이상 읽을 편지가 없습니다.");
+                return null;
             }
             return unreadLetters.get(random.nextInt(unreadLetters.size())).getId();
             //읽을 편지가 없다면 에러메시지를 응답값으로 전달 예정
@@ -69,7 +74,7 @@ public class LetterService {
         List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
             member, readLetters);
         if (unReadLetters.isEmpty()) {
-            throw new RuntimeException("더이상 읽을 편지가 없습니다.");
+            return null;
         }
         return unReadLetters.get(random.nextInt(unReadLetters.size())).getId();
     }
@@ -94,18 +99,23 @@ public class LetterService {
     public void reply(Long id, Long writerId, ReplyCreateRequest letterReplyRequest) {
         Member member = findMember(writerId);
         Letter letter = letterRepository.findById(id).orElseThrow();
+        if (letter.getDeletedAt() != null) {
+            throw new RuntimeException("삭제된 편지는 답장할 수 없습니다.");
+        }
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
         if (existsByIdAndWriterId || letter.getReplyLetterId() != null) {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         boolean existsByWriterIdAndReplyLetterId = letterRepository
             .existsByWriterIdAndReplyLetterId(writerId, id);
-
         if (existsByWriterIdAndReplyLetterId) {
             throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
         }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
-        letterRepository.save(replyLetter);
+        Letter saveLetter = letterRepository.save(replyLetter);
+
+        //답장 보낼 원래 편지 작성자와 답장의 id를 mailbox에 저장
+        mailBoxRepository.save(new MailBox(saveLetter, letter.getWriter()));
     }
 
     public List<LetterListResponse> findReplyList(Long id, Long memberId) {
@@ -137,6 +147,21 @@ public class LetterService {
             mailBoxRepository.save(new MailBox(reply, member));
         }
         return new LetterDetailResponse(reply);
+    }
+
+    @Transactional
+    public void delete(Long id, Long memberId) {
+        Member member = findMember(memberId);
+        Letter letter = letterRepository.findById(id).orElseThrow();
+
+        mailBoxRepository.findByLetterIdAndMemberId(id, memberId);
+        boolean existsByLetterIdAndMemberId = mailBoxRepository.existsByLetterIdAndMemberId(id,
+            memberId);
+        if (existsByLetterIdAndMemberId) {
+            throw new RuntimeException("이미 삭제한 편지입니다.");
+        }
+        letter.updateDeletedAt();
+        trashRepository.save(new Trash(letter, member));
     }
 
     private Member findMember(Long writerId) {

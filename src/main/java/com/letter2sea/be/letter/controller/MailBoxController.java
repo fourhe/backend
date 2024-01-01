@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,5 +48,12 @@ public class MailBoxController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         Long memberId = jwtProvider.decode(authorization);
         return letterService.findReplyDetail(id, replyId, memberId);
+    }
+
+    @PostMapping("/{id}")
+    public void getDelete(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        letterService.delete(id, memberId);
     }
 }
