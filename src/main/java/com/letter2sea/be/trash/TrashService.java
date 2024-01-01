@@ -1,5 +1,10 @@
 package com.letter2sea.be.trash;
 
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_NOT_FOUND;
+import static com.letter2sea.be.exception.type.MemberExceptionType.MEMBER_NOT_FOUND;
+
+import com.letter2sea.be.exception.Letter2SeaException;
+import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.member.repository.MemberRepository;
 import com.letter2sea.be.trash.domain.Trash;
@@ -36,17 +41,22 @@ public class TrashService {
     public void restore(Long id, Long memberId) {
         findMember(memberId);
         boolean existsByIdAndMemberId = trashRepository.existsByIdAndMemberId(id, memberId);
-        Trash deletedLetter = trashRepository.findById(id).orElseThrow();
 
-        //해당부분에서 에러남
-        deletedLetter.getLetter().restoreDeletedAt();
         if (!existsByIdAndMemberId) {
-            throw new RuntimeException("존재하지 않은 편지입니다.");
+            throw new Letter2SeaException(LETTER_NOT_FOUND);
         }
+
+        Trash deletedLetter = trashRepository.findById(id)
+            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_FOUND));
+        Letter letter = letterRepository.findByIdIgnoreDeletedAt(deletedLetter.getLetterId())
+            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_FOUND));
+
+        letter.restoreDeletedAt();
 
         trashRepository.deleteByIdAndMemberId(id,memberId);
     }
     private void findMember(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow();
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new Letter2SeaException(MEMBER_NOT_FOUND));
     }
 }

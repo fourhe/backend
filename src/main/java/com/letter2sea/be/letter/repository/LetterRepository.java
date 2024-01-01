@@ -18,6 +18,9 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     Optional<Letter> findByIdAndWriterId(Long id, Long writerId);
 
+    @Query(value = "select * from Letter as l where l.id = :id", nativeQuery = true)
+    Optional<Letter> findByIdIgnoreDeletedAt(@Param("id") Long id);
+
     boolean existsByWriterIdAndReplyLetterId(Long writerId, Long replyLetterId);
 
     //작성자가 아니면서, replyLetterId가 null인
