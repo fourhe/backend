@@ -6,6 +6,7 @@ import com.letter2sea.be.trash.dto.TrashListResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,5 +41,12 @@ public class TrashController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         Long memberId = jwtProvider.decode(authorization);
         trashService.restore(id, memberId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        trashService.delete(id, memberId);
     }
 }

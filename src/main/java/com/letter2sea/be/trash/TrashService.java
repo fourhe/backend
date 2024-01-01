@@ -55,6 +55,19 @@ public class TrashService {
 
         trashRepository.deleteByIdAndMemberId(id,memberId);
     }
+
+    @Transactional
+    public void delete(Long id, Long memberId) {
+        findMember(memberId);
+        boolean existsByIdAndMemberId = trashRepository.existsByIdAndMemberId(id, memberId);
+
+        if (!existsByIdAndMemberId) {
+            throw new Letter2SeaException(LETTER_NOT_FOUND);
+        }
+
+        trashRepository.deleteByIdAndMemberId(id,memberId);
+    }
+
     private void findMember(Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new Letter2SeaException(MEMBER_NOT_FOUND));
