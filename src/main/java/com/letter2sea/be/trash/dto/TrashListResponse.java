@@ -15,7 +15,7 @@ public class TrashListResponse {
 
     public TrashListResponse(Trash trash) {
         this.id = trash.getId();
-        this.letterId = trash.getLetter().getId();
+        this.letterId = trash.getLetterId();
         this.title = trash.getTitle();
         this.deletedAt = trash.getDeletedAt();
     }

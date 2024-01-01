@@ -29,9 +29,7 @@ public class Trash {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String content;
 
-    @JoinColumn
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Letter letter;
+    private Long letterId;
 
     @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,7 +40,7 @@ public class Trash {
     public Trash(Letter letter, Member member) {
         this.title = letter.getTitle();
         this.content = letter.getContent();
-        this.letter = letter;
+        this.letterId = letter.getId();
         this.member = member;
         this.deletedAt = LocalDateTime.now();
     }
