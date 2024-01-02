@@ -5,7 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum LetterExceptionType implements ExceptionType {
-    LETTER_NOT_FOUND("LETTER001", "존재하지 않는 편지입니다.", HttpStatus.NOT_FOUND);
+    LETTER_NOT_FOUND("LETTER001", "존재하지 않는 편지입니다.", HttpStatus.NOT_FOUND),
+    LETTER_ALREADY_DELETED("LETTER002", "이미 삭제한 편지입니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
     private final String message;

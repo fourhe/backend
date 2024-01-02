@@ -14,4 +14,6 @@ public interface TrashRepository extends JpaRepository<Trash, Long> {
     boolean existsByIdAndMemberId(Long id, Long memberId);
 
     void deleteByIdAndMemberId(Long id, Long memberId);
+
+    boolean existsByLetterIdAndMemberId(Long id, Long memberId);
 }

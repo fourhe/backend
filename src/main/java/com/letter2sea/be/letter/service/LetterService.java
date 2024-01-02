@@ -1,5 +1,8 @@
 package com.letter2sea.be.letter.service;
 
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_DELETED;
+
+import com.letter2sea.be.exception.Letter2SeaException;
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
@@ -155,10 +158,10 @@ public class LetterService {
         Letter letter = letterRepository.findById(id).orElseThrow();
 
         mailBoxRepository.findByLetterIdAndMemberId(id, memberId);
-        boolean existsByLetterIdAndMemberId = mailBoxRepository.existsByLetterIdAndMemberId(id,
-            memberId);
+        boolean existsByLetterIdAndMemberId = trashRepository.existsByLetterIdAndMemberId(id, memberId);
+
         if (existsByLetterIdAndMemberId) {
-            throw new RuntimeException("이미 삭제한 편지입니다.");
+            throw new Letter2SeaException(LETTER_ALREADY_DELETED);
         }
         letter.updateDeletedAt();
         trashRepository.save(new Trash(letter, member));
