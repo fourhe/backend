@@ -57,4 +57,8 @@ public class Letter extends BaseTimeEntity {
     public void restoreDeletedAt() {
         this.deletedAt = null;
     }
+
+    public void thankToWriter() {
+        this.writer.increaseThankCount();
+    }
 }

@@ -29,6 +29,7 @@ public class Member extends BaseTimeEntity {
     private String email;
     private String nickname;
     private String refreshToken;
+    private int thankCount;
 
     @OneToMany(mappedBy = "member")
     private List<MailBox> mailBoxes = new ArrayList<>();
@@ -52,4 +53,7 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void increaseThankCount() {
+        this.thankCount++;
+    }
 }
