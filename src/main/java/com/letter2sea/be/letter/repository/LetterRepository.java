@@ -36,4 +36,6 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 //    @Query("select l from Letter l where l.id not in (:id)")
 //    List<Letter> findAllByIdNotIn(@Param("id") List<Long> ids);
 
+    int countAllByWriterAndReplyLetterIdIsNull(Member writer);
+    int countAllByWriterAndReplyLetterIdIsNotNull(Member writer);
 }

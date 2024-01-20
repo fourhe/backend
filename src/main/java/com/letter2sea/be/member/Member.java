@@ -43,6 +43,7 @@ public class Member extends BaseTimeEntity {
         this.email = email;
         this.nickname = nickname;
         this.refreshToken = refreshToken;
+        this.thankCount = 0;
     }
 
     public void updateEmail(String email) {
