@@ -3,6 +3,8 @@ package com.letter2sea.be.letter.service;
 import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_DELETED;
 
 import com.letter2sea.be.exception.Letter2SeaException;
+import com.letter2sea.be.exception.type.LetterExceptionType;
+import com.letter2sea.be.exception.type.MailBoxExceptionType;
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
@@ -165,6 +167,20 @@ public class LetterService {
         }
         letter.updateDeletedAt();
         trashRepository.save(new Trash(letter, member));
+    }
+
+    @Transactional
+    public void thanks(Long id, Long memberId) {
+        Member member = findMember(memberId);
+
+        MailBox replyMailBox = mailBoxRepository.findByIdAndMember(id, member)
+            .orElseThrow(() -> new Letter2SeaException(LetterExceptionType.LETTER_NOT_FOUND));
+
+        if (replyMailBox.isThanked()) {
+            throw new Letter2SeaException(MailBoxExceptionType.MAILBOX_ALREADY_THANKED);
+        }
+
+        replyMailBox.thanks();
     }
 
     private Member findMember(Long writerId) {
