@@ -2,9 +2,9 @@ package com.letter2sea.be.trash;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
 import com.letter2sea.be.trash.dto.TrashDetailResponse;
-import com.letter2sea.be.trash.dto.TrashListResponse;
-import java.util.List;
+import com.letter2sea.be.trash.dto.TrashPaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,10 +23,10 @@ public class TrashController {
     private final TrashService trashService;
 
     @GetMapping
-    public List<TrashListResponse> getList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+    public TrashPaginatedResponse getList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, Pageable pageable) {
         Long memberId = jwtProvider.decode(authorization);
-        return trashService.findList(memberId);
+        return trashService.findList(pageable, memberId);
     }
 
     @GetMapping("/{id}")
