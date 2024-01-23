@@ -2,13 +2,11 @@ package com.letter2sea.be.letter.controller;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
 import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
-import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
-import com.letter2sea.be.letter.dto.response.LetterListResponse;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
+import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.service.LetterService;
 import jakarta.validation.Valid;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -59,10 +57,10 @@ public class LetterController {
     }
 
     //random줍기 관련해서 임시 API
-    @GetMapping("/test")
-    public List<LetterListResponse> randomTest(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-        Long memberId = jwtProvider.decode(authorization);
-        return letterService.randomTest(memberId);
-    }
+//    @GetMapping("/test")
+//    public List<LetterListResponse> randomTest(
+//        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+//        Long memberId = jwtProvider.decode(authorization);
+//        return letterService.randomTest(memberId);
+//    }
 }

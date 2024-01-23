@@ -10,6 +10,7 @@ import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
+import com.letter2sea.be.letter.dto.response.LetterPaginatedResponse;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
@@ -22,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +34,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LetterService {
 
+    private static final int MAX_PAGE_SIZE = 1000;
+
     private static final Random random = new SecureRandom();
     private final LetterRepository letterRepository;
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
     private final TrashRepository trashRepository;
+
 
 
     @Transactional
@@ -45,22 +52,49 @@ public class LetterService {
         mailBoxRepository.save(new MailBox(letter, member));
     }
 
-    public List<LetterListResponse> findList(Long writerId) {
-        List<Letter> letterList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId);
+//    //일반 list 반환
+//    public List<LetterListResponse> findList(Long writerId) {
+//        List<Letter> letterList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId);
+//
+//        List<LetterListResponse> result = new ArrayList<>();
+//
+//        for (Letter letter : letterList) {
+//            List<Letter> replyList = letterRepository.findAllByReplyLetterId(
+//                letter.getId());
+//
+//            boolean hasNewReply = replyList.stream()
+//                .anyMatch(
+//                    reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(), writerId));
+//
+//            result.add(new LetterListResponse(letter, hasNewReply));
+//        }
+//        return result;
+//    }
+
+    public LetterPaginatedResponse findAll(Pageable pageable, Long writerId) {
+        Pageable pageRequest = exchangePageRequest(pageable);
+
+        Page<Letter> findList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(
+            writerId, pageRequest);
+
+        List<Letter> contents = findList.getContent();
 
         List<LetterListResponse> result = new ArrayList<>();
 
-        for (Letter letter : letterList) {
+        for (Letter content : contents) {
             List<Letter> replyList = letterRepository.findAllByReplyLetterId(
-                letter.getId());
+                content.getId());
 
             boolean hasNewReply = replyList.stream()
-                .anyMatch(
-                    reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(), writerId));
+                .anyMatch(reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(),
+                    writerId));
 
-            result.add(new LetterListResponse(letter, hasNewReply));
+            result.add(new LetterListResponse(content, hasNewReply));
         }
-        return result;
+
+        return new LetterPaginatedResponse(pageable.getPageNumber(), contents.size(),
+            findList.getTotalPages() - 1, result);
+
     }
 
     public LetterDetailResponse findDetail(Long id, Long writerId) {
@@ -191,6 +225,15 @@ public class LetterService {
         }
 
         replyMailBox.thanks();
+    }
+
+    private Pageable exchangePageRequest(Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+
+        if (pageSize <= MAX_PAGE_SIZE) {
+            return pageable;
+        }
+        return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
     }
 
     private Member findMember(Long writerId) {
