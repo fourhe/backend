@@ -51,9 +51,16 @@ public class MailBoxController {
     }
 
     @PostMapping("/{id}")
-    public void getDelete(@PathVariable Long id,
+    public void delete(@PathVariable Long id,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         Long memberId = jwtProvider.decode(authorization);
         letterService.delete(id, memberId);
+    }
+
+    @PostMapping("/{replyId}/thanks")
+    public void thanks(@PathVariable Long replyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        letterService.thanks(replyId, memberId);
     }
 }

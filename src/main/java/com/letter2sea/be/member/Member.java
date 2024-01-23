@@ -29,6 +29,7 @@ public class Member extends BaseTimeEntity {
     private String email;
     private String nickname;
     private String refreshToken;
+    private int thankCount;
 
     @OneToMany(mappedBy = "member")
     private List<MailBox> mailBoxes = new ArrayList<>();
@@ -42,6 +43,7 @@ public class Member extends BaseTimeEntity {
         this.email = email;
         this.nickname = nickname;
         this.refreshToken = refreshToken;
+        this.thankCount = 0;
     }
 
     public void updateEmail(String email) {
@@ -52,4 +54,7 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void increaseThankCount() {
+        this.thankCount++;
+    }
 }

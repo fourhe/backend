@@ -31,8 +31,15 @@ public class MailBox extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    private boolean thanked;
+
     public MailBox(Letter letter, Member member) {
         this.letter = letter;
         this.member = member;
+    }
+
+    public void thanks() {
+        this.thanked = true;
+        this.letter.thankToWriter();
     }
 }
