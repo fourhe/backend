@@ -12,10 +12,10 @@ public class LetterListResponse {
     private final boolean hasNewReply;
     private final LocalDateTime createdAt;
 
-    public LetterListResponse(Letter letter) {
+    public LetterListResponse(Letter letter, boolean hasNewReply) {
         this.id = letter.getId();
         this.title = letter.getTitle();
-        this.hasNewReply = false;
+        this.hasNewReply = hasNewReply;
         this.createdAt = letter.getCreatedAt();
     }
 }

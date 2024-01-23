@@ -3,9 +3,11 @@ package com.letter2sea.be.letter.controller;
 import com.letter2sea.be.auth.jwt.JwtProvider;
 import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
+import com.letter2sea.be.letter.dto.response.LetterPaginatedResponse;
 import com.letter2sea.be.letter.service.LetterService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +25,10 @@ public class MailBoxController {
     private final LetterService letterService;
 
     @GetMapping
-    public List<LetterListResponse> getList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+    public LetterPaginatedResponse getList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, Pageable pageable) {
         Long writerId = jwtProvider.decode(authorization);
-        return letterService.findList(writerId);
+        return letterService.findAll(pageable, writerId);
     }
 
     @GetMapping("/{id}")

@@ -10,8 +10,12 @@ import com.letter2sea.be.member.repository.MemberRepository;
 import com.letter2sea.be.trash.domain.Trash;
 import com.letter2sea.be.trash.dto.TrashDetailResponse;
 import com.letter2sea.be.trash.dto.TrashListResponse;
+import com.letter2sea.be.trash.dto.TrashPaginatedResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +24,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TrashService {
 
+    private static final int MAX_PAGE_SIZE = 1000;
+
     private final TrashRepository trashRepository;
     private final MemberRepository memberRepository;
     private final LetterRepository letterRepository;
 
-    public List<TrashListResponse> findList(Long memberId) {
+    public TrashPaginatedResponse findList(Pageable pageable, Long memberId) {
         findMember(memberId);
-        return trashRepository.findAllByMemberId(memberId).stream()
+
+        Pageable pageRequest = exchangePageRequest(pageable);
+
+        Page<Trash> findList = trashRepository.findAllByMemberId(memberId, pageRequest);
+        List<TrashListResponse> trashListResponses = findList.getContent().stream()
             .map(TrashListResponse::new)
             .toList();
-    }
 
+        return new TrashPaginatedResponse(pageable.getPageNumber(), findList.getSize(),
+            findList.getTotalPages(), trashListResponses);
+    }
     public TrashDetailResponse findDetail(Long id, Long memberId) {
         findMember(memberId);
         Trash findTrash = trashRepository.findByIdAndMemberId(id, memberId).orElseThrow();
@@ -66,6 +78,16 @@ public class TrashService {
         }
 
         trashRepository.deleteByIdAndMemberId(id,memberId);
+    }
+
+
+    private Pageable exchangePageRequest(Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+
+        if (pageSize <= MAX_PAGE_SIZE) {
+            return pageable;
+        }
+        return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
     }
 
     private void findMember(Long memberId) {

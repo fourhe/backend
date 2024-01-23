@@ -10,6 +10,7 @@ import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
 import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
+import com.letter2sea.be.letter.dto.response.LetterPaginatedResponse;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
@@ -18,10 +19,13 @@ import com.letter2sea.be.member.repository.MemberRepository;
 import com.letter2sea.be.trash.TrashRepository;
 import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +34,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LetterService {
 
+    private static final int MAX_PAGE_SIZE = 1000;
+
     private static final Random random = new SecureRandom();
     private final LetterRepository letterRepository;
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
-
     private final TrashRepository trashRepository;
+
 
 
     @Transactional
@@ -46,11 +52,49 @@ public class LetterService {
         mailBoxRepository.save(new MailBox(letter, member));
     }
 
-    public List<LetterListResponse> findList(Long writerId) {
-        return letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId)
-            .stream()
-            .map(LetterListResponse::new)
-            .collect(Collectors.toList());
+//    //일반 list 반환
+//    public List<LetterListResponse> findList(Long writerId) {
+//        List<Letter> letterList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId);
+//
+//        List<LetterListResponse> result = new ArrayList<>();
+//
+//        for (Letter letter : letterList) {
+//            List<Letter> replyList = letterRepository.findAllByReplyLetterId(
+//                letter.getId());
+//
+//            boolean hasNewReply = replyList.stream()
+//                .anyMatch(
+//                    reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(), writerId));
+//
+//            result.add(new LetterListResponse(letter, hasNewReply));
+//        }
+//        return result;
+//    }
+
+    public LetterPaginatedResponse findAll(Pageable pageable, Long writerId) {
+        Pageable pageRequest = exchangePageRequest(pageable);
+
+        Page<Letter> findList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(
+            writerId, pageRequest);
+
+        List<Letter> contents = findList.getContent();
+
+        List<LetterListResponse> result = new ArrayList<>();
+
+        for (Letter content : contents) {
+            List<Letter> replyList = letterRepository.findAllByReplyLetterId(
+                content.getId());
+
+            boolean hasNewReply = replyList.stream()
+                .anyMatch(reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(),
+                    writerId));
+
+            result.add(new LetterListResponse(content, hasNewReply));
+        }
+
+        return new LetterPaginatedResponse(pageable.getPageNumber(), contents.size(),
+            findList.getTotalPages() - 1, result);
+
     }
 
     public LetterDetailResponse findDetail(Long id, Long writerId) {
@@ -84,17 +128,20 @@ public class LetterService {
         return unReadLetters.get(random.nextInt(unReadLetters.size())).getId();
     }
 
+    //랜덤줍기 전용
     @Transactional
     public LetterDetailResponse read(Long id, Long memberId) {
         Member member = findMember(memberId);
         Letter letter = letterRepository.findById(id).orElseThrow();
 
+        Long replyLetterId = letter.getReplyLetterId();
+        boolean isValidReply = letterRepository.existsByIdAndWriterId(letter.getReplyLetterId(), memberId);
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         boolean existAlreadyReadLetter = member.getMailBoxes().stream()
             .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
 
-        if (existsByIdAndWriterId || existAlreadyReadLetter) {
-            throw new RuntimeException("잘못된 id입니다.");
+        if (replyLetterId == null || !isValidReply || existsByIdAndWriterId || existAlreadyReadLetter) {
+            throw new RuntimeException("잘못된 요청입니다.");
         }
         mailBoxRepository.save(new MailBox(letter, member));
         return new LetterDetailResponse(letter);
@@ -117,10 +164,7 @@ public class LetterService {
             throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
         }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
-        Letter saveLetter = letterRepository.save(replyLetter);
-
-        //답장 보낼 원래 편지 작성자와 답장의 id를 mailbox에 저장
-        mailBoxRepository.save(new MailBox(saveLetter, letter.getWriter()));
+        letterRepository.save(replyLetter);
     }
 
     public List<LetterListResponse> findReplyList(Long id, Long memberId) {
@@ -130,7 +174,7 @@ public class LetterService {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         return letterRepository.findAllByReplyLetterId(id).stream()
-            .map(LetterListResponse::new)
+            .map(l -> new LetterListResponse(l, false))
             .toList();
     }
 
@@ -183,21 +227,30 @@ public class LetterService {
         replyMailBox.thanks();
     }
 
+    private Pageable exchangePageRequest(Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+
+        if (pageSize <= MAX_PAGE_SIZE) {
+            return pageable;
+        }
+        return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
+    }
+
     private Member findMember(Long writerId) {
         return memberRepository.findById(writerId).orElseThrow();
     }
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현
-    public List<LetterListResponse> randomTest(Long memberId) {
-        Member member = findMember(memberId);
-
-        List<Long> readLetters = member.getMailBoxes().stream()
-            .map(mailBox -> mailBox.getLetter().getId())
-            .toList();
-
-        List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
-            member, readLetters);
-
-        return unReadLetters.stream().map(LetterListResponse::new).toList();
-    }
+//    public List<LetterListResponse> randomTest(Long memberId) {
+//        Member member = findMember(memberId);
+//
+//        List<Long> readLetters = member.getMailBoxes().stream()
+//            .map(mailBox -> mailBox.getLetter().getId())
+//            .toList();
+//
+//        List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
+//            member, readLetters);
+//
+//        return unReadLetters.stream().map(LetterListResponse::new).toList();
+//    }
 }
