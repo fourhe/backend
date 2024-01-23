@@ -18,9 +18,9 @@ import com.letter2sea.be.member.repository.MemberRepository;
 import com.letter2sea.be.trash.TrashRepository;
 import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +34,6 @@ public class LetterService {
     private final LetterRepository letterRepository;
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
-
     private final TrashRepository trashRepository;
 
 
@@ -47,10 +46,21 @@ public class LetterService {
     }
 
     public List<LetterListResponse> findList(Long writerId) {
-        return letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId)
-            .stream()
-            .map(LetterListResponse::new)
-            .collect(Collectors.toList());
+        List<Letter> letterList = letterRepository.findAllByWriterIdAndReplyLetterIdIsNull(writerId);
+
+        List<LetterListResponse> result = new ArrayList<>();
+
+        for (Letter letter : letterList) {
+            List<Letter> replyList = letterRepository.findAllByReplyLetterId(
+                letter.getId());
+
+            boolean hasNewReply = replyList.stream()
+                .anyMatch(
+                    reply -> !mailBoxRepository.existsByLetterIdAndMemberId(reply.getId(), writerId));
+
+            result.add(new LetterListResponse(letter, hasNewReply));
+        }
+        return result;
     }
 
     public LetterDetailResponse findDetail(Long id, Long writerId) {
@@ -84,17 +94,20 @@ public class LetterService {
         return unReadLetters.get(random.nextInt(unReadLetters.size())).getId();
     }
 
+    //랜덤줍기 전용
     @Transactional
     public LetterDetailResponse read(Long id, Long memberId) {
         Member member = findMember(memberId);
         Letter letter = letterRepository.findById(id).orElseThrow();
 
+        Long replyLetterId = letter.getReplyLetterId();
+        boolean isValidReply = letterRepository.existsByIdAndWriterId(letter.getReplyLetterId(), memberId);
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         boolean existAlreadyReadLetter = member.getMailBoxes().stream()
             .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
 
-        if (existsByIdAndWriterId || existAlreadyReadLetter) {
-            throw new RuntimeException("잘못된 id입니다.");
+        if (replyLetterId == null || !isValidReply || existsByIdAndWriterId || existAlreadyReadLetter) {
+            throw new RuntimeException("잘못된 요청입니다.");
         }
         mailBoxRepository.save(new MailBox(letter, member));
         return new LetterDetailResponse(letter);
@@ -117,10 +130,7 @@ public class LetterService {
             throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
         }
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
-        Letter saveLetter = letterRepository.save(replyLetter);
-
-        //답장 보낼 원래 편지 작성자와 답장의 id를 mailbox에 저장
-        mailBoxRepository.save(new MailBox(saveLetter, letter.getWriter()));
+        letterRepository.save(replyLetter);
     }
 
     public List<LetterListResponse> findReplyList(Long id, Long memberId) {
@@ -130,7 +140,7 @@ public class LetterService {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
         return letterRepository.findAllByReplyLetterId(id).stream()
-            .map(LetterListResponse::new)
+            .map(l -> new LetterListResponse(l, false))
             .toList();
     }
 
@@ -188,16 +198,16 @@ public class LetterService {
     }
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현
-    public List<LetterListResponse> randomTest(Long memberId) {
-        Member member = findMember(memberId);
-
-        List<Long> readLetters = member.getMailBoxes().stream()
-            .map(mailBox -> mailBox.getLetter().getId())
-            .toList();
-
-        List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
-            member, readLetters);
-
-        return unReadLetters.stream().map(LetterListResponse::new).toList();
-    }
+//    public List<LetterListResponse> randomTest(Long memberId) {
+//        Member member = findMember(memberId);
+//
+//        List<Long> readLetters = member.getMailBoxes().stream()
+//            .map(mailBox -> mailBox.getLetter().getId())
+//            .toList();
+//
+//        List<Letter> unReadLetters = letterRepository.findAllByWriterNotAndIdNotIn(
+//            member, readLetters);
+//
+//        return unReadLetters.stream().map(LetterListResponse::new).toList();
+//    }
 }

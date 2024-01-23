@@ -10,5 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface MailBoxRepository extends JpaRepository<MailBox, Long> {
 
     MailBox findByLetterIdAndMemberId(Long letterId, Long memberId);
+
+    boolean existsByLetterIdAndMemberId(Long letterId, Long memberId);
+
     Optional<MailBox> findByIdAndMember(Long letterId, Member member);
 }
