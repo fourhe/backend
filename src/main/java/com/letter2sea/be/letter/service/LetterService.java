@@ -135,13 +135,13 @@ public class LetterService {
         Letter letter = letterRepository.findById(id).orElseThrow();
 
         Long replyLetterId = letter.getReplyLetterId();
-        boolean isValidReply = letterRepository.existsByIdAndWriterId(letter.getReplyLetterId(), memberId);
+//        boolean isValidReply = letterRepository.existsByIdAndWriterId(letter.getReplyLetterId(), memberId);
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         boolean existAlreadyReadLetter = member.getMailBoxes().stream()
             .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
 
-        if (replyLetterId == null || !isValidReply || existsByIdAndWriterId || existAlreadyReadLetter) {
-            throw new RuntimeException("잘못된 요청입니다.");
+        if (replyLetterId != null || existsByIdAndWriterId || existAlreadyReadLetter) {
+            throw new Letter2SeaException(LetterExceptionType.LETTER_ALREADY_READ);
         }
         mailBoxRepository.save(new MailBox(letter, member));
         return new LetterDetailResponse(letter);
