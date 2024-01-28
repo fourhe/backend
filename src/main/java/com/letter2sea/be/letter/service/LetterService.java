@@ -217,7 +217,7 @@ public class LetterService {
     public void thanks(Long id, Long memberId) {
         Member member = findMember(memberId);
 
-        MailBox replyMailBox = mailBoxRepository.findByIdAndMember(id, member)
+        MailBox replyMailBox = mailBoxRepository.findByLetterIdAndMember(id, member)
             .orElseThrow(() -> new Letter2SeaException(LetterExceptionType.LETTER_NOT_FOUND));
 
         if (replyMailBox.isThanked()) {

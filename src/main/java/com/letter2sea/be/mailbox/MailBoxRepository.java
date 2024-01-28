@@ -13,5 +13,5 @@ public interface MailBoxRepository extends JpaRepository<MailBox, Long> {
 
     boolean existsByLetterIdAndMemberId(Long letterId, Long memberId);
 
-    Optional<MailBox> findByIdAndMember(Long letterId, Member member);
+    Optional<MailBox> findByLetterIdAndMember(Long letterId, Member member);
 }
