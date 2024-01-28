@@ -93,7 +93,7 @@ public class LetterService {
         }
 
         return new LetterPaginatedResponse(pageable.getPageNumber(), contents.size(),
-            findList.getTotalPages() - 1, result);
+            findList.getTotalPages(), result);
 
     }
 
