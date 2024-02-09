@@ -32,6 +32,7 @@ public class Member extends BaseTimeEntity {
     private String nickname;
     private String refreshToken;
     private int thankCount;
+    private boolean notificationEnabled;
     private LocalDateTime lastLoginAt;
 
     @OneToMany(mappedBy = "member")
@@ -50,8 +51,9 @@ public class Member extends BaseTimeEntity {
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateEmail(String email) {
+    public void update(String email, boolean notificationEnabled) {
         this.email = email;
+        this.notificationEnabled = notificationEnabled;
     }
 
     public void updateRefreshToken(String refreshToken) {
@@ -64,5 +66,9 @@ public class Member extends BaseTimeEntity {
 
     public void updateLastLoginTime() {
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public boolean isFirstLogin() {
+        return this.getCreatedAt() == this.lastLoginAt;
     }
 }
