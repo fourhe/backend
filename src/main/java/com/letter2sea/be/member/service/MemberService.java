@@ -17,7 +17,7 @@ public class MemberService {
     @Transactional
     public void update(Long memberId, MemberUpdateRequest updateRequest) {
         Member member = findMember(memberId);
-        member.updateEmail(updateRequest.email());
+        member.update(updateRequest.email(), updateRequest.notificationEnabled());
     }
 
     private Member findMember(Long writerId) {
