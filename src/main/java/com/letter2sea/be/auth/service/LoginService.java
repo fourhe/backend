@@ -29,6 +29,7 @@ public class LoginService {
     public void updateRefreshToken(String jwtRefreshToken, Long memberId) {
         Member findMember = memberRepository.findById(memberId).orElseThrow(RuntimeException::new);
         findMember.updateRefreshToken(jwtRefreshToken);
+        findMember.updateLastLoginTime();
     }
 
     @Transactional

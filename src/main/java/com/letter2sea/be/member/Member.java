@@ -8,6 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -30,6 +32,8 @@ public class Member extends BaseTimeEntity {
     private String nickname;
     private String refreshToken;
     private int thankCount;
+    private boolean notificationEnabled;
+    private LocalDateTime lastLoginAt;
 
     @OneToMany(mappedBy = "member")
     private List<MailBox> mailBoxes = new ArrayList<>();
@@ -44,10 +48,12 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
         this.refreshToken = refreshToken;
         this.thankCount = 0;
+        this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateEmail(String email) {
+    public void update(String email, boolean notificationEnabled) {
         this.email = email;
+        this.notificationEnabled = notificationEnabled;
     }
 
     public void updateRefreshToken(String refreshToken) {
@@ -56,5 +62,13 @@ public class Member extends BaseTimeEntity {
 
     public void increaseThankCount() {
         this.thankCount++;
+    }
+
+    public void updateLastLoginTime() {
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public boolean isFirstLogin() {
+        return this.getCreatedAt() == this.lastLoginAt;
     }
 }

@@ -7,8 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TrashRepository extends JpaRepository<Trash, Long> {
-
-//    List<Trash> findAllByMemberId(Long memberId);
+    int countAllByMemberId(Long memberId);
 
     Page<Trash> findAllByMemberId(Long memberId, Pageable pageable);
 
