@@ -1,9 +1,8 @@
 package com.letter2sea.be.letter.service;
 
-import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_DELETED;
+import static com.letter2sea.be.exception.type.LetterExceptionType.*;
 
 import com.letter2sea.be.exception.Letter2SeaException;
-import com.letter2sea.be.exception.type.LetterExceptionType;
 import com.letter2sea.be.exception.type.MailBoxExceptionType;
 import com.letter2sea.be.letter.domain.Letter;
 import com.letter2sea.be.letter.dto.request.LetterCreateRequest;
@@ -141,7 +140,7 @@ public class LetterService {
             .anyMatch(mailBox -> mailBox.getLetter().getId().equals(id));
 
         if (replyLetterId != null || existsByIdAndWriterId || existAlreadyReadLetter) {
-            throw new Letter2SeaException(LetterExceptionType.LETTER_ALREADY_READ);
+            throw new Letter2SeaException(LETTER_ALREADY_READ);
         }
         mailBoxRepository.save(new MailBox(letter, member));
         return new LetterDetailResponse(letter);
@@ -150,19 +149,11 @@ public class LetterService {
     @Transactional
     public void reply(Long id, Long writerId, ReplyCreateRequest letterReplyRequest) {
         Member member = findMember(writerId);
-        Letter letter = letterRepository.findById(id).orElseThrow();
-        if (letter.getDeletedAt() != null) {
-            throw new RuntimeException("삭제된 편지는 답장할 수 없습니다.");
-        }
-        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, writerId);
-        if (existsByIdAndWriterId || letter.getReplyLetterId() != null) {
-            throw new RuntimeException("존재하지 않은 편지입니다.");
-        }
-        boolean existsByWriterIdAndReplyLetterId = letterRepository
-            .existsByWriterIdAndReplyLetterId(writerId, id);
-        if (existsByWriterIdAndReplyLetterId) {
-            throw new RuntimeException("이미 답장한 편지에는 답장할 수 없습니다.");
-        }
+        Letter letter = letterRepository.findById(id)
+            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_FOUND));
+
+        validateLetterToReply(letter, id, writerId);
+
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
         letterRepository.save(replyLetter);
     }
@@ -218,7 +209,7 @@ public class LetterService {
         Member member = findMember(memberId);
 
         MailBox replyMailBox = mailBoxRepository.findByLetterIdAndMember(id, member)
-            .orElseThrow(() -> new Letter2SeaException(LetterExceptionType.LETTER_NOT_FOUND));
+            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_FOUND));
 
         if (replyMailBox.isThanked()) {
             throw new Letter2SeaException(MailBoxExceptionType.MAILBOX_ALREADY_THANKED);
@@ -238,6 +229,25 @@ public class LetterService {
 
     private Member findMember(Long writerId) {
         return memberRepository.findById(writerId).orElseThrow();
+    }
+
+    private void validateLetterToReply(Letter letter, Long letterId, Long userId) {
+        if (letter.getDeletedAt() != null) {
+            throw new Letter2SeaException(LETTER_NOT_FOUND);
+        }
+
+        // 자신이 작성한 편지인 경우
+        boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(letterId, userId);
+        if (existsByIdAndWriterId) {
+            throw new Letter2SeaException(LETTER_ALREADY_REPLY);
+        }
+
+        // 이미 답장한 편지인 경우 또는 답장에 다시 답장하려고 하는 경우
+        boolean existsByWriterIdAndReplyLetterId = letterRepository
+            .existsByWriterIdAndReplyLetterId(userId, letterId);
+        if (existsByWriterIdAndReplyLetterId || letter.getReplyLetterId() != null) {
+            throw new Letter2SeaException(LETTER_ALREADY_REPLY);
+        }
     }
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현
