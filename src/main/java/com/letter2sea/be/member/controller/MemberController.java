@@ -6,6 +6,7 @@ import com.letter2sea.be.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,5 +25,11 @@ public class MemberController {
         @Valid @RequestBody MemberUpdateRequest request) {
         Long memberId = jwtProvider.decode(authorization);
         memberService.update(memberId, request);
+    }
+
+    @DeleteMapping
+    public void delete(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        Long memberId = jwtProvider.decode(authorization);
+        memberService.delete(memberId);
     }
 }

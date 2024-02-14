@@ -20,6 +20,12 @@ public class MemberService {
         member.update(updateRequest.emailAddress(), updateRequest.notificationEnabled());
     }
 
+    @Transactional
+    public void delete(Long memberId) {
+        Member member = findMember(memberId);
+        memberRepository.delete(member);
+    }
+
     private Member findMember(Long writerId) {
         return memberRepository.findById(writerId)
             .orElseThrow(() -> new Letter2SeaException(MemberExceptionType.MEMBER_NOT_FOUND));
