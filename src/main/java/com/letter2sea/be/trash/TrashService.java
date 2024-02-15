@@ -30,23 +30,32 @@ public class TrashService {
     private final MemberRepository memberRepository;
     private final LetterRepository letterRepository;
 
-    public TrashPaginatedResponse findList(Pageable pageable, Long memberId) {
+    public TrashPaginatedResponse findList(String type, Pageable pageable, Long memberId) {
         findMember(memberId);
 
         Pageable pageRequest = exchangePageRequest(pageable);
 
-        Page<Trash> findList = trashRepository.findAllByMemberId(memberId, pageRequest);
+        if (type.equals("letter")) {
+            Page<Trash> findList = trashRepository.findAllByLetterTrash(memberId, pageRequest);
+            List<TrashListResponse> trashListResponses = findList.getContent().stream()
+                .map(TrashListResponse::new).toList();
+
+            return new TrashPaginatedResponse(pageable.getPageNumber(), findList.getSize(),
+                findList.getTotalPages(), trashListResponses);
+        }
+
+        Page<Trash> findList = trashRepository.findAllByReplyTrash(memberId, pageRequest);
         List<TrashListResponse> trashListResponses = findList.getContent().stream()
-            .map(TrashListResponse::new)
-            .toList();
+            .map(TrashListResponse::new).toList();
 
         return new TrashPaginatedResponse(pageable.getPageNumber(), findList.getSize(),
             findList.getTotalPages(), trashListResponses);
     }
+
     public TrashDetailResponse findDetail(Long id, Long memberId) {
         findMember(memberId);
         Trash findTrash = trashRepository.findByIdAndMemberId(id, memberId).orElseThrow();
-       return new TrashDetailResponse(findTrash);
+        return new TrashDetailResponse(findTrash);
     }
 
     @Transactional
@@ -65,7 +74,7 @@ public class TrashService {
 
         letter.restoreDeletedAt();
 
-        trashRepository.deleteByIdAndMemberId(id,memberId);
+        trashRepository.deleteByIdAndMemberId(id, memberId);
     }
 
     @Transactional
@@ -77,7 +86,7 @@ public class TrashService {
             throw new Letter2SeaException(LETTER_NOT_FOUND);
         }
 
-        trashRepository.deleteByIdAndMemberId(id,memberId);
+        trashRepository.deleteByIdAndMemberId(id, memberId);
     }
 
 

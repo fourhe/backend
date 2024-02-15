@@ -1,6 +1,8 @@
 package com.letter2sea.be.trash;
 
 import com.letter2sea.be.auth.jwt.JwtProvider;
+import com.letter2sea.be.exception.Letter2SeaException;
+import com.letter2sea.be.exception.type.CommonExceptionType;
 import com.letter2sea.be.trash.dto.TrashDetailResponse;
 import com.letter2sea.be.trash.dto.TrashPaginatedResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,9 +27,13 @@ public class TrashController {
 
     @GetMapping
     public TrashPaginatedResponse getList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, Pageable pageable) {
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+        @RequestParam String type, Pageable pageable) {
         Long memberId = jwtProvider.decode(authorization);
-        return trashService.findList(pageable, memberId);
+        if (!(type.equals("letter") || type.equals("reply"))) {
+            throw new Letter2SeaException(CommonExceptionType.INCORRECT_REQUEST_PARAM);
+        }
+        return trashService.findList(type, pageable, memberId);
     }
 
     @GetMapping("/{id}")
