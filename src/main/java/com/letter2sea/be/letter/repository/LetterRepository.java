@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -42,4 +43,8 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     int countAllByWriterAndReplyLetterIdIsNull(Member writer);
     int countAllByWriterAndReplyLetterIdIsNotNull(Member writer);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE letter l SET l.writer_id = NULL WHERE l.writer_id = :writerId", nativeQuery = true)
+    void detachFromWriter(@Param("writerId") Long writerId);
 }

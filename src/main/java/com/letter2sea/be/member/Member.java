@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +34,11 @@ public class Member extends BaseTimeEntity {
     private boolean notificationEnabled;
     private LocalDateTime lastLoginAt;
 
-    @OneToMany(mappedBy = "member")
-    private List<MailBox> mailBoxes = new ArrayList<>();
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
+    private final List<MailBox> mailBoxes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
-    private List<Trash> TrashList = new ArrayList<>();
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
+    private final List<Trash> TrashList = new ArrayList<>();
 
     @Builder
     public Member(Long kakaoId, String email, String nickname, String refreshToken) {
