@@ -10,6 +10,7 @@ import com.letter2sea.be.letter.dto.request.ReplyCreateRequest;
 import com.letter2sea.be.letter.dto.response.LetterDetailResponse;
 import com.letter2sea.be.letter.dto.response.LetterListResponse;
 import com.letter2sea.be.letter.dto.response.LetterPaginatedResponse;
+import com.letter2sea.be.letter.dto.response.ReplyListResponse;
 import com.letter2sea.be.letter.repository.LetterRepository;
 import com.letter2sea.be.mailbox.MailBoxRepository;
 import com.letter2sea.be.mailbox.domain.MailBox;
@@ -20,6 +21,7 @@ import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -158,14 +160,15 @@ public class LetterService {
         letterRepository.save(replyLetter);
     }
 
-    public List<LetterListResponse> findReplyList(Long id, Long memberId) {
-        findMember(memberId);
+    public List<ReplyListResponse> findReplyList(Long id, Long memberId) {
+        Member member = findMember(memberId);
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         if (!existsByIdAndWriterId) {
             throw new RuntimeException("존재하지 않은 편지입니다.");
         }
+
         return letterRepository.findAllByReplyLetterId(id).stream()
-            .map(l -> new LetterListResponse(l, false))
+            .map(l -> new ReplyListResponse(l, isReplyThanked(l, member)))
             .toList();
     }
 
@@ -248,6 +251,12 @@ public class LetterService {
         if (existsByWriterIdAndReplyLetterId || letter.getReplyLetterId() != null) {
             throw new Letter2SeaException(LETTER_ALREADY_REPLY);
         }
+    }
+
+    private boolean isReplyThanked(Letter reply, Member member) {
+        Optional<MailBox> mailBox = mailBoxRepository.findByLetterIdAndMember(
+            reply.getId(), member);
+        return mailBox.map(MailBox::isThanked).orElse(false);
     }
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현
