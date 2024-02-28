@@ -1,5 +1,7 @@
 package com.letter2sea.be.auth.service;
 
+import com.letter2sea.be.exception.Letter2SeaException;
+import com.letter2sea.be.exception.type.MemberExceptionType;
 import com.letter2sea.be.member.Member;
 import com.letter2sea.be.member.repository.MemberRepository;
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class LoginService {
     @Transactional
     public void deleteRefreshToken(Long decodedMemberId) {
         Member findMember = memberRepository.findById(decodedMemberId)
-            .orElseThrow(RuntimeException::new);
+            .orElseThrow(() -> new Letter2SeaException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         findMember.updateRefreshToken(null);
     }
