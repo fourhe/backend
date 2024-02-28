@@ -2,6 +2,7 @@ package com.letter2sea.be.letter.service;
 
 import static com.letter2sea.be.exception.type.LetterExceptionType.*;
 
+import com.letter2sea.be.common.util.MailSender;
 import com.letter2sea.be.exception.Letter2SeaException;
 import com.letter2sea.be.exception.type.MailBoxExceptionType;
 import com.letter2sea.be.letter.domain.Letter;
@@ -42,8 +43,7 @@ public class LetterService {
     private final MemberRepository memberRepository;
     private final MailBoxRepository mailBoxRepository;
     private final TrashRepository trashRepository;
-
-
+    private final MailSender mailSender;
 
     @Transactional
     public void create(Long writerId, LetterCreateRequest letterCreateRequest) {
@@ -158,6 +158,8 @@ public class LetterService {
 
         Letter replyLetter = letterReplyRequest.toEntity(member, letter);
         letterRepository.save(replyLetter);
+
+        sendEmailNotification(letter);
     }
 
     public List<ReplyListResponse> findReplyList(Long id, Long memberId) {
@@ -257,6 +259,12 @@ public class LetterService {
         Optional<MailBox> mailBox = mailBoxRepository.findByLetterIdAndMember(
             reply.getId(), member);
         return mailBox.map(MailBox::isThanked).orElse(false);
+    }
+
+    private void sendEmailNotification(Letter letter) {
+        Member writer = letter.getWriter();
+        if (writer.getEmail() == null || writer.getEmail().isBlank() || !writer.isNotificationEnabled()) return;
+        mailSender.send(letter.getTitle(), writer.getEmail());
     }
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현

@@ -13,11 +13,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class OAuthController {
@@ -41,20 +43,27 @@ public class OAuthController {
         Member oauthMember = oauthService.requestUserInfo(accessToken);
         Long memberId = loginService.login(oauthMember);
 
+        log.info("login member id = {}", memberId);
+
         String jwtAccessToken = jwtProvider.issueAccessToken(memberId);
         String jwtRefreshToken = jwtProvider.issueRefreshToken(memberId);
         loginService.updateRefreshToken(jwtRefreshToken, memberId);
 
         response.setHeader(ACCESS_TOKEN, jwtAccessToken);
         response.setHeader(REFRESH_TOKEN, jwtRefreshToken);
+
+        log.info("login ok.. accessToken = {}", jwtAccessToken);
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request) {
-        String refreshToken = request.getHeader(REFRESH_TOKEN);
-        Long decodedMemberId = jwtProvider.decode(refreshToken);
+    public void logout(HttpServletRequest servletRequest) {
+        String refreshToken = servletRequest.getHeader(REFRESH_TOKEN);
+        log.info("login refresh token = {}", refreshToken);
 
-        loginService.deleteRefreshToken(decodedMemberId);
+        Long memberId = jwtProvider.decode(refreshToken);
+        log.info("logout member id = {}", memberId);
+
+        loginService.deleteRefreshToken(memberId);
     }
 
     @GetMapping("/reissue/access-token")
