@@ -1,6 +1,10 @@
 package com.letter2sea.be.letter.service;
 
-import static com.letter2sea.be.exception.type.LetterExceptionType.*;
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_DELETED;
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_READ;
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_ALREADY_REPLY;
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_NOT_FOUND;
+import static com.letter2sea.be.exception.type.LetterExceptionType.LETTER_NOT_READ;
 
 import com.letter2sea.be.common.util.MailSender;
 import com.letter2sea.be.exception.Letter2SeaException;
@@ -22,7 +26,6 @@ import com.letter2sea.be.trash.domain.Trash;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -166,11 +169,11 @@ public class LetterService {
         Member member = findMember(memberId);
         boolean existsByIdAndWriterId = letterRepository.existsByIdAndWriterId(id, memberId);
         if (!existsByIdAndWriterId) {
-            throw new RuntimeException("존재하지 않은 편지입니다.");
+            throw new Letter2SeaException(LETTER_NOT_FOUND);
         }
 
         return letterRepository.findAllByReplyLetterId(id).stream()
-            .map(l -> new ReplyListResponse(l, isReplyThanked(l, member)))
+            .map(l -> new ReplyListResponse(l, findReply(l, member)))
             .toList();
     }
 
@@ -214,7 +217,7 @@ public class LetterService {
         Member member = findMember(memberId);
 
         MailBox replyMailBox = mailBoxRepository.findByLetterIdAndMember(id, member)
-            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_FOUND));
+            .orElseThrow(() -> new Letter2SeaException(LETTER_NOT_READ));
 
         if (replyMailBox.isThanked()) {
             throw new Letter2SeaException(MailBoxExceptionType.MAILBOX_ALREADY_THANKED);
@@ -255,10 +258,9 @@ public class LetterService {
         }
     }
 
-    private boolean isReplyThanked(Letter reply, Member member) {
-        Optional<MailBox> mailBox = mailBoxRepository.findByLetterIdAndMember(
-            reply.getId(), member);
-        return mailBox.map(MailBox::isThanked).orElse(false);
+    private MailBox findReply(Letter reply, Member member) {
+        return mailBoxRepository.findByLetterIdAndMember(
+            reply.getId(), member).orElse(null);
     }
 
     private void sendEmailNotification(Letter letter) {
@@ -266,6 +268,7 @@ public class LetterService {
         if (writer.getEmail() == null || writer.getEmail().isBlank() || !writer.isNotificationEnabled()) return;
         mailSender.send(letter.getTitle(), writer.getEmail());
     }
+
 
     //랜덤 줍기 구현 중 리스트를 응답으로 주는 메서드 임시 구현
 //    public List<LetterListResponse> randomTest(Long memberId) {
